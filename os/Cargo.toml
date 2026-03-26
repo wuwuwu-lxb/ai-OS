@@ -5,9 +5,6 @@ edition = "2021"
 
 [workspace]
 
-[dependencies]
-x86_64 = "0.15"
-
 [profile.dev]
 panic = "abort"
 
@@ -15,3 +12,6 @@ panic = "abort"
 panic = "abort"
 lto = true
 codegen-units = 1
+
+[profile.release.build-args]
+"-C" = "link-arg=-no-pie"

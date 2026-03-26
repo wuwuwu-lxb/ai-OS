@@ -30,3 +30,5 @@ logs/
 
 # Crash dumps
 core
+*.iso
+target/

@@ -23,9 +23,9 @@ pub extern "C" fn _start() -> ! {
     vga::write_string("[OK] Kernel loaded!\n");
     vga::write_string("\nSystem halted.\n");
 
-    // Halt
+    // Halt using inline assembly
     loop {
-        x86_64::instructions::hlt();
+        unsafe { core::arch::asm!("hlt", options(nomem, nostack)); }
     }
 }
 
