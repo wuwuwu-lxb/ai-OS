@@ -1,47 +1,100 @@
 # AI-OS
 
-An AI-Native Operating System built with Rust, where AI is not just an application but the core interface of the entire system.
+An AI-Native Operating System built with Rust, featuring a bare metal kernel and AI-powered user experience.
 
-## Overview
+## Project Structure
 
-AI-OS reimagines the traditional operating system experience by placing a large language model as the central orchestrator. Instead of typing commands into a terminal or clicking on icons, users interact with their computer through natural conversation. The AI understands intent, executes tasks, manages files, and continuously learns from interactions.
+```
+OS-ai/
+├── crates/           # AI User Space Application (runs on Linux)
+└── os/              # Bare Metal OS Kernel (x86_64)
+```
 
-## Key Features
+## Two Components
 
-- **AI-First Interface**: Natural language is the primary way to interact with the system
-- **Multi-Modal Support**: Text, voice, images, and code inputs
-- **Cloud-First AI**: Leverages Claude/OpenAI APIs with local fallback for resilience
-- **Memory & Context**: Persistent conversation history and semantic memory
-- **Self-Iterative**: The system can improve itself through AI-generated enhancements
+### 1. AI User Space (`crates/`)
+
+A Rust application that runs on Linux, providing Claude/OpenAI powered AI interaction.
+
+**Features:**
+- Terminal REPL interface
+- Claude/OpenAI API integration
+- Conversation memory and context
+- Multi-modal input processing (text, voice, image, code)
+
+**Build & Run:**
+```bash
+cd OS-ai
+export ANTHROPIC_API_KEY="your-key-here"
+cargo run --release
+```
+
+### 2. Bare Metal Kernel (`os/`)
+
+A minimal x86_64 OS kernel written in Rust, designed to run directly on hardware.
+
+**Current Features:**
+- Multiboot2 compliant bootloader
+- VGA text mode driver
+- Basic kernel entry and halt
+
+**Build (requires nightly Rust):**
+```bash
+cd os
+rustup nightly install
+rustup target add x86_64-unknown-none --toolchain nightly
+make
+```
+
+**Test in QEMU (requires additional tools):**
+```bash
+# Install boot tools
+sudo apt install mtools grub-pc
+
+# Create bootable ISO
+grub-mkrescue -o target/ai-os.iso target/iso
+
+# Run in QEMU
+qemu-system-x86_64 -cdrom target/ai-os.iso -nographic
+```
 
 ## Architecture
 
+### User Space Architecture
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    User Interaction Layer                    │
-│        CLI (REPL)  │  Voice I/O  │  GUI (future)          │
-├─────────────────────────────────────────────────────────────┤
-│                  Multi-Modal Processing Layer                │
-│           Text │ Voice (STT) │ Image │ Code                 │
+│                    CLI (REPL)                               │
 ├─────────────────────────────────────────────────────────────┤
 │                    AI Orchestration Layer                    │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │   Context Manager │ AI Middleware │ Local Fallback   │    │
-│  └─────────────────────────────────────────────────────┘    │
+│     Context Manager │ AI Middleware │ Cloud + Local         │
 ├─────────────────────────────────────────────────────────────┤
 │                    System Services Layer                     │
-│     Filesystem │ Process │ Memory │ Network │ Policy        │
+│     Memory │ Filesystem │ Network │ Process                 │
 ├─────────────────────────────────────────────────────────────┤
 │                      Linux Kernel                            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Crates
+### Kernel Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Bootloader (GRUB)                        │
+├─────────────────────────────────────────────────────────────┤
+│                    Kernel (Rust no_std)                    │
+│     VGA Driver │ GDT │ Interrupts (future)                │
+├─────────────────────────────────────────────────────────────┤
+│                    User Space (future)                       │
+│     AI Process │ Shell │ Applications                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Crates (User Space)
 
 | Crate | Description |
 |-------|-------------|
 | `aios-core` | Main orchestrator and entry point |
-| `aios-ai` | AI middleware (Claude/OpenAI/Local providers) |
+| `aios-ai` | AI middleware (Claude/OpenAI providers) |
 | `aios-cli` | Terminal REPL interface |
 | `aios-memory` | Conversation history and embeddings |
 | `aios-multimodal` | Text, voice, image processing |
@@ -52,76 +105,27 @@ AI-OS reimagines the traditional operating system experience by placing a large 
 | `aios-policy` | Permission and security engine |
 | `aios-kernel` | Linux syscall bridge |
 
-## Getting Started
-
-### Prerequisites
-
-- Rust 1.70+
-- Linux (for full functionality)
-- API keys: `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`
-
-### Build
-
-```bash
-cargo build --release
-```
-
-### Run
-
-```bash
-# Set API key
-export ANTHROPIC_API_KEY="your-key-here"
-
-# Run
-cargo run --release
-```
-
-### Usage
-
-Once running, you'll see the AI-OS terminal:
-
-```
-╔═══════════════════════════════════════╗
-║           AI-OS Terminal               ║
-║   Your AI-Native Operating System     ║
-╚═══════════════════════════════════════╝
-
-Type your message and press Enter.
-Press Ctrl+C or Ctrl+D to exit.
-
-❯ Hello, what can you do?
-```
-
-## Configuration
-
-Create `.aios/config.toml` to customize settings:
-
-```toml
-[ai]
-primary_provider = "claude"
-default_model = "claude-sonnet-4-20250514"
-max_tokens = 4096
-temperature = 0.7
-
-[memory]
-context_window_tokens = 128000
-short_term_retention_days = 7
-
-[cli]
-prompt = "❯ "
-show_timestamps = true
-```
-
 ## Roadmap
 
+### User Space Application
 - [x] Phase 1: Core foundation, CLI, AI integration
 - [ ] Phase 2: Multi-modal input (voice, image)
-- [ ] Phase 3: System services (filesystem, process management)
+- [ ] Phase 3: System services integration
 - [ ] Phase 4: Memory and persistence
 - [ ] Phase 5: Network and offline fallback
 - [ ] Phase 6: Voice synthesis output
 - [ ] Phase 7: Policy and security
 - [ ] Phase 8: Self-iteration capabilities
+
+### Bare Metal Kernel
+- [x] Bootloader and kernel entry
+- [ ] Interrupt handling
+- [ ] Memory management (paging, heap)
+- [ ] Keyboard driver
+- [ ] Basic filesystem
+- [ ] Process scheduler
+- [ ] AI service as first user process
+- [ ] AI-readable filesystem interface
 
 ## License
 
