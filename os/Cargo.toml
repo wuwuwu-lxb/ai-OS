@@ -1,0 +1,17 @@
+[package]
+name = "ai-os-kernel"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+x86_64 = "0.15"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
