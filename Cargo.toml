@@ -1,0 +1,55 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/aios-core",
+    "crates/aios-ai",
+    "crates/aios-cli",
+    "crates/aios-multimodal",
+    "crates/aios-fs",
+    "crates/aios-process",
+    "crates/aios-memory",
+    "crates/aios-network",
+    "crates/aios-voice",
+    "crates/aios-policy",
+    "crates/aios-kernel",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["AI-OS Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/aios/aios"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+thiserror = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+rustyline = "15"
+clap = { version = "4", features = ["derive"] }
+
+# Async runtime
+async-trait = "0.1"
+
+# Error handling
+tracing-error = "0.2"
+
+# Encoding
+base64 = "0.22"
+
+# MIME types
+mime_guess = "2"
+
+# Serialization
+toml = "0.8"
+
+[profile.release]
+opt-level = 3
+lto = true

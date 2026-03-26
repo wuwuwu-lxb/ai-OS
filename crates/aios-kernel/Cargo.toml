@@ -1,0 +1,13 @@
+[package]
+name = "aios-kernel"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+tracing.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
