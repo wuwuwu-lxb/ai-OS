@@ -1,34 +1,21 @@
 # Build artifacts
-/target/
-debug/
+target/
+*.o
+*.iso
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# AI-OS specific
-.aios/
-*.aios
-
-# Environment
-.env
-.env.local
-
 # Logs
 *.log
-logs/
 
-# Editor directories
-*.sublime-*
-
-# Crash dumps
-core
-*.iso
-target/
+# Temporary files
+*.tmp
+*.bak
