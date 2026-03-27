@@ -18,6 +18,10 @@ mod heap;
 mod process;
 mod scheduler;
 mod context_switch;
+mod ai_service;
+mod vector_db;
+mod capability;
+mod ai_core;
 
 fn write_u64(n: u64) {
     let mut buffer = [0u8; 20];
@@ -44,22 +48,16 @@ fn write_u32(n: u32) {
     write_u64(n as u64);
 }
 
-extern "C" fn idle_task() {
-    loop {
-        unsafe { core::arch::asm!("hlt", options(nomem, nostack)); }
-    }
-}
-
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     serial::init();
     serial::write_string("\r\n==========================================\r\n");
-    serial::write_string("  AI-OS Kernel v0.4.0 - Process System\r\n");
+    serial::write_string("  AI-OS Kernel v0.5.0 - AI Services\r\n");
     serial::write_string("==========================================\r\n\r\n");
 
     vga::init();
     vga::clear_screen();
-    vga::write_string("AI-OS Kernel v0.4.0\r\n");
+    vga::write_string("AI-OS Kernel v0.5.0\r\n");
     vga::write_string("==================\r\n\r\n");
 
     serial::write_string("[OK] Serial port initialized\r\n");
@@ -118,8 +116,6 @@ pub extern "C" fn _start() -> ! {
     serial::write_string("[OK] Creating idle process...\r\n");
     process::init();
 
-    serial::write_string("[INFO] Process structures ready\r\n");
-
     serial::write_string("\r\n[INFO] Total system memory: ");
     write_u64(memory::get_total_memory() / (1024 * 1024));
     serial::write_string(" MB\r\n");
@@ -132,14 +128,30 @@ pub extern "C" fn _start() -> ! {
     write_u32(process::get_process_count() as u32);
     serial::write_string("\r\n");
 
-    serial::write_string("\r\n[OK] AI-OS Kernel v0.4.0 is running!\r\n");
+    serial::write_string("\r\n[OK] Initializing AI Service Framework...\r\n");
+    ai_core::init();
+
+    serial::write_string("\r\n[INFO] AI Service Summary:\r\n");
+    serial::write_string("  Capabilities registered: ");
+    write_u32(ai_core::capability::get_capability_count() as u32);
+    serial::write_string("\r\n");
+    serial::write_string("  Services registered: ");
+    write_u32(ai_core::ai_service::get_service_count() as u32);
+    serial::write_string("\r\n");
+    serial::write_string("  Vector storage: ");
+    write_u32(ai_core::vector_db::get_count());
+    serial::write_string(" vectors\r\n");
+    serial::write_string("\r\n");
+
+    serial::write_string("\r\n[OK] AI-OS Kernel v0.5.0 is running!\r\n");
     serial::write_string("[OK] Process Management: Ready\r\n");
     serial::write_string("[OK] Scheduler: Active\r\n");
+    serial::write_string("[OK] AI Services: Active\r\n");
     serial::write_string("[OK] Timer: 100 Hz\r\n");
     serial::write_string("\r\n");
 
     vga::write_string("[OK] Kernel running!\r\n");
-    vga::write_string("Process Management Ready\r\n\r\n");
+    vga::write_string("AI Services Ready\r\n\r\n");
 
     let mut tick_counter: u64 = 0;
     let mut seconds: u64 = 0;
@@ -151,7 +163,6 @@ pub extern "C" fn _start() -> ! {
         if tick_counter < current_ticks {
             tick_counter = current_ticks;
             if tick_counter % 100 == 0 {
-                seconds += 1;
                 scheduler::on_tick();
             }
         }
